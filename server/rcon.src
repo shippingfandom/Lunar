@@ -1,6 +1,12 @@
+// Night Lunar configuration made easy!
+
+REPOSITORY_ADDRESS="this.is.your.repository!"
+
+// End of configuration
+
 //server control program
 COB=get_custom_object
-import_code("/root/Fox.so")
+import_code("/root/foxlib.src")
 
 COB.server={}
 
@@ -24,9 +30,9 @@ if apt then
 	if get_shell.host_computer.File("/etc/apt") then
 		if not get_shell.host_computer.File("/etc/apt/aptcache.bin") then apt.update
 	end if
-	inSource=apt.show("x.x.x.x") //-- replace "x.x.x.x" 's here with your hackshop ip
-	if inSource == "x.x.x.x repository not found" then
-		apt.add_repo("x.x.x.x",1542)
+	inSource=apt.show(REPOSITORY_ADDRESS) //-- replace "x.x.x.x" 's here with your hackshop ip
+	if inSource == REPOSITORY_ADDRESS+" repository not found" then
+		apt.add_repo(REPOSITORY_ADDRESS,1542)
 		apt.update
 	end if
 	if typeof(apt.check_upgrade(mxf)) == "number" and apt.check_upgrade(mxf) then

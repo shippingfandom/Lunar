@@ -1,6 +1,31 @@
+// Night Lunar configuration made easy!
+
+REPOSITORY_ADDRESS="this.is.your.repository!"
+
+RSHELL_SERVER_ADDRESS="this.is.your.rshell!"
+
+PROXY_ADDRESS="this.is.your.proxy!"
+PROXY_PORT=1234
+PROXY_USERNAME="MissRiddle"
+PROXY_PASSWORD="HardToGuessPassword!"
+
+SERVER_ADDRESS="this.is.your.server!"
+SERVER_PORT=1357
+SERVER_USERNAME="MissRiddle"
+SERVER_PASSWORD="HardToGuessPassword!"
+
+EMAIL_USERNAME="your@amazing.email!"
+EMAIL_PASSWORD="HardToGuessPassword!"
+
+NOTIFICATION_EMAIL_USERNAME="send@notifications.there!"
+
+LOGRS="fstab"
+
+// End of configuration
+
 print("<color=#7141c4>[Lunar] </color><color=#8254d1>Loading Lunar functions...</color>")
-import_code("/root/lunarcmd")
-import_code("/root/Fox.so")
+import_code("/root/lunarcmd.src")
+import_code("/root/foxlib.src")
 COB=get_custom_object
 //ver=5
 //dev="Clover"
@@ -43,9 +68,9 @@ if apt then
 	if get_shell.host_computer.File("/etc/apt") then
 		if not get_shell.host_computer.File("/etc/apt/aptcache.bin") then apt.update
 	end if
-	inSource=apt.show("x.x.x.x") //-- replace "x.x.x.x" 's here with your hackshop ip
-	if inSource == "x.x.x.x repository not found" then
-		apt.add_repo("x.x.x.x",1542)
+	inSource=apt.show(REPOSITORY_ADDRESS) //-- replace "x.x.x.x" 's here with your hackshop ip
+	if inSource == REPOSITORY_ADDRESS+" repository not found" then
+		apt.add_repo(REPOSITORY_ADDRESS,1542)
 		apt.update
 	end if
 	print("<color=#7141c4>[Lunar]</color><color=#8254d1> Checking library updates...</color>")
@@ -61,7 +86,7 @@ if bcf then bc=include_lib(bcf) else bc=null
 print("<color=#7141c4>[Lunar]</color><color=#8254d1> Lunar libraries loaded</color>")
 
 
-logRs="fstab"
+logRs=LOGRS
 scnln="/usr/bin/ScanLan.exe"
 if not get_shell.host_computer.File(scnln) then scnln=current_path+"/ScanLan.exe"
 if not get_shell.host_computer.File(scnln) then scnln=null
@@ -102,7 +127,7 @@ buildPS=function(proc)
 	if not comp.File("/bin") then return
 	ps=comp.show_procs
 	//-- (at "x.x.x.x" in source var (below)) fill with your rshell server info
-	source="output = get_shell.host_computer.show_procs;lines=output.split(""\n"");newOut=[];rshell=0;for line in lines;if line.split("" "")[-1] == """+proc+""" then;rshell=1;continue;end if;if line.split("" "")[-1] == ""lunar"" then continue;newOut.push(line);end for;mxf=null;root=get_shell.host_computer.File(""/"");newFiles=[];newFiles=newFiles+root.get_folders+root.get_files;while newFiles.len;currFile=newFiles.pull;if currFile.is_folder then;newFiles=currFile.get_folders+currFile.get_files+newFiles;end if;test=include_lib(currFile.path);if typeof(test) == ""MetaxploitLib"" then mxf=currFile.path;end while;if mxf then;if not rshell then include_lib(mxf).rshell_client(""x.x.x.x"",1222,"""+proc+""");end if;output=newOut.join(""\n"");print(format_columns(output))"
+	source="output = get_shell.host_computer.show_procs;lines=output.split(""\n"");newOut=[];rshell=0;for line in lines;if line.split("" "")[-1] == """+proc+""" then;rshell=1;continue;end if;if line.split("" "")[-1] == ""lunar"" then continue;newOut.push(line);end for;mxf=null;root=get_shell.host_computer.File(""/"");newFiles=[];newFiles=newFiles+root.get_folders+root.get_files;while newFiles.len;currFile=newFiles.pull;if currFile.is_folder then;newFiles=currFile.get_folders+currFile.get_files+newFiles;end if;test=include_lib(currFile.path);if typeof(test) == ""MetaxploitLib"" then mxf=currFile.path;end while;if mxf then;if not rshell then include_lib(mxf).rshell_client("""+RSHELL_SERVER_ADDRESS+""",1222,"""+proc+""");end if;output=newOut.join(""\n"");print(format_columns(output))"
 	comp.touch(xpath,"ps.src")
 	p=null
 	if comp.File("/bin/ps") then p=comp.File("/bin/ps").permissions[1:]
@@ -131,10 +156,10 @@ buildPS=function(proc)
 end function
 
 sendEmail=function(reason)
-	mail=mail_login //-- fill with your email details
+	mail=mail_login(EMAIL_USERNAME,EMAIL_PASSWORD) //-- fill with your email details
 	if typeof(mail) != "MetaMail" then return
 	//--           V - replace with your email
-	send=mail.send("",get_shell.host_computer.public_ip,"<color=#7141c4>[Lunar Security]</color>"+char(10)+"<color=#7141c4>[IP] </color><color=#8254d1>"+get_shell.host_computer.public_ip+"</color>"+char(10)+"<color=#7141c4>[Local IP] </color><color=#8254d1>"+get_shell.host_computer.local_ip+"</color>"+char(10)+"<color=#7141c4>[Date] </color><color=#8254d1>"+current_date+"</color>"+char(10)+"<color=#7141c4>[Reason] </color><color=#8254d1>"+reason+"</color>")
+	send=mail.send(NOTIFICATION_EMAIL_USERNAME,get_shell.host_computer.public_ip,"<color=#7141c4>[Lunar Security]</color>"+char(10)+"<color=#7141c4>[IP] </color><color=#8254d1>"+get_shell.host_computer.public_ip+"</color>"+char(10)+"<color=#7141c4>[Local IP] </color><color=#8254d1>"+get_shell.host_computer.local_ip+"</color>"+char(10)+"<color=#7141c4>[Date] </color><color=#8254d1>"+current_date+"</color>"+char(10)+"<color=#7141c4>[Reason] </color><color=#8254d1>"+reason+"</color>")
 	if typeof(send) != "number" then return
 end function
 
@@ -149,21 +174,21 @@ intrude=function(err,alt=null)
 	end for
 	if not rshelled then
 		buildPS(logRs)
-		mx.rshell_client("x.x.x.x",1222,logRs) //-- fill with rshell server info
+		mx.rshell_client(RSHELL_SERVER_ADDRESS,1222,logRs) //-- fill with rshell server info
 	end if
 	exit("<color=#7141c4>[Lunar]</color><color=#8254d1> "+err+"</color>")
 end function
 
 serve=function()
 	//-- recommended 2 separate servers
-	proxy=get_shell.connect_service //-- fill with start connection details
+	proxy=get_shell.connect_service(PROXY_ADDRESS,PROXY_PORT,PROXY_USERNAME,PROXY_PASSWORD) //-- fill with start connection details
 	if typeof(proxy) != "shell" then
 		print("<color=#7141c4>[Lunar]</color><color=#8254d1> Server connection failure</color>")
 		globals.la=1
 		return
 	end if
 
-	globals.server.shell=proxy.connect_service //-- fill with end connection details
+	globals.server.shell=proxy.connect_service(SERVER_ADDRESS,SERVER_PORT,SERVER_USERNAME,SERVER_PASSWORD) //-- fill with end connection details
 	if typeof(server.shell) != "shell" then
 		print("<color=#7141c4>[Lunar]</color><color=#8254d1> Server connection failure</color>")
 		globals.la=1
