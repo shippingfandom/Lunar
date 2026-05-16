@@ -1,0 +1,47 @@
+// Night Lunar configuration made easy!
+
+REPOSITORY_ADDRESS="this.is.your.repository!"
+
+// End of configuration
+
+//server control program
+COB=get_custom_object
+import_code("/root/foxlib.src")
+
+COB.server={}
+
+libs=FoxLib.General.LibFinder
+print libs
+mxf=libs.mxf
+cpf=libs.cpf
+cp=null
+apt=null
+if cpf then cp=include_lib(cpf)
+if libs.apt then apt=include_lib(libs.apt)
+COB.server.cp=cp
+
+mx=null
+
+if not mxf then exit("<color=#7141c4>[Lunar] </color><color=#8254d1>Remote exploit library not found</color>")
+if not cpf then exit("<color=#7141c4>[Lunar] </color><color=#8254d1>Remote crypto library not found</color>")
+cp=include_lib(cpf)
+
+if apt then
+	if get_shell.host_computer.File("/etc/apt") then
+		if not get_shell.host_computer.File("/etc/apt/aptcache.bin") then apt.update
+	end if
+	inSource=apt.show(REPOSITORY_ADDRESS) //-- replace "x.x.x.x" 's here with your hackshop ip
+	if inSource == REPOSITORY_ADDRESS+" repository not found" then
+		apt.add_repo(REPOSITORY_ADDRESS,1542)
+		apt.update
+	end if
+	if typeof(apt.check_upgrade(mxf)) == "number" and apt.check_upgrade(mxf) then
+		print("<color=#7141c4>[Lunar]</color><color=#8254d1> Updating remote exploit library...</color>\n")
+		apt.install("metaxploit.so",parent_path(mxf))
+	end if
+end if
+
+mx=include_lib(mxf)
+
+COB.server.mx=mx
+exit
